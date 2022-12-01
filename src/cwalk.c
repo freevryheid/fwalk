@@ -1,1 +1,1 @@
-/home/grassy/fwalk/cwalk/src/cwalk.c
+../cwalk/src/cwalk.c
