@@ -21,6 +21,14 @@ module fwalk
 	public::path_is_separator,path_guess_style
 	public::path_set_style,path_get_style
 
+	! type,public,bind(c)::cwk_segment
+	! 	type(c_ptr)::path
+	! 	type(c_ptr)::segments
+	! 	type(c_ptr)::begin
+	! 	type(c_ptr)::end
+	! 	integer(kind=c_size_t)::size
+	! endtype
+
 	type,public,bind(c)::cwk_segment
 		character(kind=c_char)::path
 		character(kind=c_char)::segments
@@ -44,7 +52,7 @@ module fwalk
 
 	interface
 
-		function path_get_absolute(base,path,buffer,buffer_size)&
+		function cwk_path_get_absolute(base,path,buffer,buffer_size)&
 		&bind(c,name="cwk_path_get_absolute")&
 		&result(ret)
 			import c_size_t,c_char
@@ -53,9 +61,9 @@ module fwalk
 			character(kind=c_char)::path
 			character(kind=c_char)::buffer
 			integer(kind=c_size_t),value::buffer_size
-		endfunction path_get_absolute
+		endfunction cwk_path_get_absolute
 
-		function path_get_relative(base_directory,path,buffer,buffer_size)&
+		function cwk_path_get_relative(base_directory,path,buffer,buffer_size)&
 		&bind(c,name="cwk_path_get_relative")&
 		&result(ret)
 			import c_size_t,c_char
@@ -64,9 +72,9 @@ module fwalk
 			character(kind=c_char)::path
 			character(kind=c_char)::buffer
 			integer(kind=c_size_t),value::buffer_size
-		endfunction path_get_relative
+		endfunction cwk_path_get_relative
 
-		function path_join(path_a,path_b,buffer,buffer_size)&
+		function cwk_path_join(path_a,path_b,buffer,buffer_size)&
 		&bind(c,name="cwk_path_join")&
 		&result(ret)
 			import c_size_t,c_char
@@ -75,7 +83,7 @@ module fwalk
 			character(kind=c_char)::path_b
 			character(kind=c_char)::buffer
 			integer(kind=c_size_t),value::buffer_size
-		endfunction path_join
+		endfunction cwk_path_join
 
 		function path_join_multiple(paths,buffer,buffer_size)&
 		&bind(c,name="cwk_path_join_multiple")&
@@ -87,14 +95,14 @@ module fwalk
 			integer(kind=c_size_t),value::buffer_size
 		endfunction path_join_multiple
 
-		subroutine path_get_root(path,length)&
+		subroutine cwk_path_get_root(path,length)&
 		&bind(c,name="cwk_path_get_root")
 			import c_size_t,c_char
 			character(kind=c_char)::path
 			integer(kind=c_size_t)::length
-		endsubroutine path_get_root
+		endsubroutine cwk_path_get_root
 
-		function path_change_root(path,new_root,buffer,buffer_size)&
+		function cwk_path_change_root(path,new_root,buffer,buffer_size)&
 		&bind(c,name="cwk_path_change_root")&
 		&result(ret)
 			import c_size_t,c_char
@@ -103,23 +111,23 @@ module fwalk
 			character(kind=c_char)::new_root
 			character(kind=c_char)::buffer
 			integer(kind=c_size_t),value::buffer_size
-		endfunction path_change_root
+		endfunction cwk_path_change_root
 
-		function path_is_absolute(path)&
+		function cwk_path_is_absolute(path)&
 		&bind(c,name="cwk_path_is_absolute")&
 		&result(ret)
 			import c_char,c_bool
 			logical(kind=c_bool)::ret
 			character(kind=c_char)::path
-		endfunction path_is_absolute
+		endfunction cwk_path_is_absolute
 
-		function path_is_relative(path)&
+		function cwk_path_is_relative(path)&
 		&bind(c,name="cwk_path_is_relative")&
 		&result(ret)
 			import c_char,c_bool
 			logical(kind=c_bool)::ret
 			character(kind=c_char)::path
-		endfunction path_is_relative
+		endfunction cwk_path_is_relative
 
 		subroutine cwk_path_get_basename(path,basename,length)&
 		&bind(c,name="cwk_path_get_basename")
@@ -129,7 +137,7 @@ module fwalk
 			integer(kind=c_size_t)::length
 		endsubroutine cwk_path_get_basename
 
-		function path_change_basename(path,new_basename,buffer,buffer_size)&
+		function cwk_path_change_basename(path,new_basename,buffer,buffer_size)&
 		&bind(c,name="cwk_path_change_basename")&
 		&result(ret)
 			import c_size_t,c_char
@@ -138,34 +146,34 @@ module fwalk
 			character(kind=c_char)::new_basename
 			character(kind=c_char)::buffer
 			integer(kind=c_size_t),value::buffer_size
-		endfunction path_change_basename
+		endfunction cwk_path_change_basename
 
-		subroutine path_get_dirname(path,length)&
+		subroutine cwk_path_get_dirname(path,length)&
 		&bind(c,name="cwk_path_get_dirname")
-			import c_size_t,c_char,c_ptr
-			character(kind=c_char),intent(inout)::path
-			integer(kind=c_size_t),intent(inout)::length
-		endsubroutine path_get_dirname
+			import c_size_t,c_char
+			character(kind=c_char)::path
+			integer(kind=c_size_t)::length
+		endsubroutine cwk_path_get_dirname
 
-		function path_get_extension(path,extension,length)&
+		function cwk_path_get_extension(path,extension,length)&
 		&bind(c,name="cwk_path_get_extension")&
 		&result(ret)
 			import c_char,c_bool,c_ptr,c_size_t
 			logical(kind=c_bool)::ret
 			character(kind=c_char)::path
 			type(c_ptr)::extension
-			integer(kind=c_size_t),value::length
-		endfunction path_get_extension
+			integer(kind=c_size_t)::length
+		endfunction cwk_path_get_extension
 
-		function path_has_extension(path)&
+		function cwk_path_has_extension(path)&
 		&bind(c,name="cwk_path_has_extension")&
 		&result(ret)
 			import c_char,c_bool
 			logical(kind=c_bool)::ret
 			character(kind=c_char)::path
-		endfunction path_has_extension
+		endfunction cwk_path_has_extension
 
-		function path_change_extension(path,new_extension,buffer,buffer_size)&
+		function cwk_path_change_extension(path,new_extension,buffer,buffer_size)&
 		&bind(c,name="cwk_path_change_extension")&
 		&result(ret)
 			import c_size_t,c_char
@@ -174,9 +182,9 @@ module fwalk
 			character(kind=c_char)::new_extension
 			character(kind=c_char)::buffer
 			integer(kind=c_size_t),value::buffer_size
-		endfunction path_change_extension
+		endfunction cwk_path_change_extension
 
-		function path_normalize(path,buffer,buffer_size)&
+		function cwk_path_normalize(path,buffer,buffer_size)&
 		&bind(c,name="cwk_path_normalize")&
 		&result(ret)
 			import c_size_t,c_char
@@ -184,25 +192,25 @@ module fwalk
 			character(kind=c_char)::path
 			character(kind=c_char)::buffer
 			integer(kind=c_size_t),value::buffer_size
-		endfunction path_normalize
+		endfunction cwk_path_normalize
 
-		function path_get_intersection(path_base,path_other)&
+		function cwk_path_get_intersection(path_base,path_other)&
 		&bind(c,name="cwk_path_get_intersection")&
 		&result(ret)
 			import c_size_t,c_char
 			integer(kind=c_size_t)::ret
 			character(kind=c_char)::path_base
 			character(kind=c_char)::path_other
-		endfunction path_get_intersection
+		endfunction cwk_path_get_intersection
 
-		function path_get_first_segment(path,segment)&
+		function cwk_path_get_first_segment(path,segment)&
 		&bind(c,name="cwk_path_get_first_segment")&
 		&result(ret)
 			import c_char,c_bool,cwk_segment
 			logical(kind=c_bool)::ret
 			type(cwk_segment)::segment
 			character(kind=c_char)::path
-		endfunction path_get_first_segment
+		endfunction cwk_path_get_first_segment
 
 		function path_get_last_segment(path,segment)&
 		&bind(c,name="cwk_path_get_last_segment")&
@@ -256,13 +264,13 @@ module fwalk
 			character(kind=c_char)::str
 		endfunction path_is_separator
 
-		function path_guess_style(path)&
+		function cwk_path_guess_style(path)&
 		&bind(c,name="cwk_path_guess_style")&
 		&result(ret)
 			import cwk_path_style,c_char
 			integer(kind(cwk_path_style))::ret
 			character(kind=c_char)::path
-		endfunction path_guess_style
+		endfunction cwk_path_guess_style
 
 		subroutine path_set_style(style)&
 		&bind(c,name="cwk_path_set_style")
@@ -273,7 +281,7 @@ module fwalk
 		function path_get_style()&
 		&bind(c,name="cwk_path_get_style")&
 		&result(ret)
-			import cwk_path_style,c_char
+			import cwk_path_style
 			integer(kind(cwk_path_style))::ret
 		endfunction path_get_style
 
@@ -283,11 +291,186 @@ module fwalk
 
 		subroutine path_get_basename(path,basename,length)
 			character(len=*)::path
-			character(len=:),allocatable::basename
+			character(len=:),allocatable::basename,cpath
 			type(c_ptr)::basename_p
-			integer(kind=c_size_t)::length
-			call cwk_path_get_basename(path,basename_p,length)
-			call c_f_str_ptr(basename_p,basename)
+			integer::length
+			integer(kind=c_size_t)::clength
+			cpath=c_str(path)
+			call cwk_path_get_basename(cpath,basename_p,clength)
+			length=int(clength)
+			if(c_associated(basename_p))then
+				call c_f_str_ptr(basename_p,basename)
+			else
+				basename=""
+			endif
 		endsubroutine path_get_basename
+
+		function path_change_basename(path,new_basename,buffer,buffer_size)&
+		&result(ret)
+			integer::ret,buffer_size
+			character(len=*)::path,new_basename
+			character(len=:),allocatable::buffer,cpath,cnew_basename
+			cpath=c_str(path)
+			cnew_basename=c_str(new_basename)
+			ret=int(cwk_path_change_basename(cpath,cnew_basename,buffer,int(buffer_size,kind=c_size_t)))
+		endfunction path_change_basename
+
+		subroutine path_get_dirname(path,length)
+			character(len=*)::path
+			character(len=:),allocatable::cpath
+			integer::length
+			integer(kind=c_size_t)::clength
+			cpath=c_str(path)
+			call cwk_path_get_dirname(cpath,clength)
+			length=int(clength)
+		endsubroutine path_get_dirname
+
+		subroutine path_get_root(path,length)
+			character(len=*)::path
+			character(len=:),allocatable::cpath
+			integer::length
+			integer(kind=c_size_t)::clength
+			cpath=c_str(path)
+			call cwk_path_get_root(cpath,clength)
+			length=int(clength)
+		endsubroutine path_get_root
+
+		function path_change_root(path,new_root,buffer,buffer_size)&
+		&result(ret)
+			integer::ret,buffer_size
+			character(len=*)::path,new_root
+			character(len=:),allocatable::buffer,cpath,cnew_root
+			cpath=c_str(path)
+			cnew_root=c_str(new_root)
+			ret=int(cwk_path_change_root(cpath,cnew_root,buffer,int(buffer_size,kind=c_size_t)))
+		endfunction path_change_root
+
+		function path_is_absolute(path)&
+		&result(ret)
+			logical(kind=c_bool)::ret
+			character(len=*)::path
+			character(len=:),allocatable::cpath
+			cpath=c_str(path)
+			ret=cwk_path_is_absolute(cpath)
+		endfunction path_is_absolute
+
+		function path_is_relative(path)&
+		&result(ret)
+			logical(kind=c_bool)::ret
+			character(len=*)::path
+			character(len=:),allocatable::cpath
+			cpath=c_str(path)
+			ret=cwk_path_is_relative(cpath)
+		endfunction path_is_relative
+
+		function path_join(path_a,path_b,buffer,buffer_size)&
+		&result(ret)
+			integer::ret,buffer_size
+			character(len=*)::path_a,path_b
+			character(len=:),allocatable::buffer,cpath_a,cpath_b
+			cpath_a=c_str(path_a)
+			cpath_b=c_str(path_b)
+			ret=int(cwk_path_join(cpath_a,cpath_b,buffer,int(buffer_size,kind=c_size_t)))
+		endfunction path_join
+
+		function path_normalize(path,buffer,buffer_size)&
+		&result(ret)
+			integer::ret,buffer_size
+			character(len=*)::path
+			character(len=:),allocatable::buffer,cpath
+			cpath=c_str(path)
+			ret=int(cwk_path_normalize(cpath,buffer,int(buffer_size,kind=c_size_t)))
+		endfunction path_normalize
+
+		function path_get_intersection(path_base,path_other)&
+		&result(ret)
+			integer::ret
+			character(len=*)::path_base,path_other
+			character(len=:),allocatable::cpath_base,cpath_other
+			cpath_base=c_str(path_base)
+			cpath_other=c_str(path_other)
+			ret=int(cwk_path_get_intersection(cpath_base,cpath_other))
+		endfunction path_get_intersection
+
+		function path_get_absolute(base,path,buffer,buffer_size)&
+		&result(ret)
+			integer::ret,buffer_size
+			character(len=*)::base,path
+			character(len=:),allocatable::buffer,cbase,cpath
+			cbase=c_str(base)
+			cpath=c_str(path)
+			ret=int(cwk_path_get_absolute(cbase,cpath,buffer,int(buffer_size,kind=c_size_t)))
+		endfunction path_get_absolute
+
+		function path_get_relative(base_directory,path,buffer,buffer_size)&
+		&result(ret)
+			integer::ret,buffer_size
+			character(len=*)::base_directory,path
+			character(len=:),allocatable::buffer,cbase_directory,cpath
+			cbase_directory=c_str(base_directory)
+			cpath=c_str(path)
+			ret=int(cwk_path_get_relative(cbase_directory,cpath,buffer,int(buffer_size,kind=c_size_t)))
+		endfunction path_get_relative
+
+		function path_get_extension(path,extension,length)&
+		&result(ret)
+			logical::ret
+			character(len=*)::path
+			character(len=:),allocatable::extension,cpath
+			type(c_ptr)::extension_p
+			integer::length
+			integer(kind=c_size_t)::clength
+			cpath=c_str(path)
+			ret=cwk_path_get_extension(cpath,extension_p,clength)
+			length=int(clength)
+			if(c_associated(extension_p))then
+				call c_f_str_ptr(extension_p,extension)
+			else
+				extension=""
+			endif
+		endfunction path_get_extension
+
+		function path_has_extension(path)&
+		&result(ret)
+			logical::ret
+			character(len=*)::path
+			character(len=:),allocatable::cpath
+			cpath=c_str(path)
+			ret=cwk_path_has_extension(cpath)
+		endfunction path_has_extension
+
+		function path_change_extension(path,new_extension,buffer,buffer_size)&
+		&result(ret)
+			integer::ret,buffer_size
+			character(len=*)::path,new_extension
+			character(len=:),allocatable::buffer,cpath,cnew_extension
+			cpath=c_str(path)
+			cnew_extension=c_str(new_extension)
+			ret=int(cwk_path_change_extension(cpath,cnew_extension,buffer,int(buffer_size,kind=c_size_t)))
+		endfunction path_change_extension
+
+		function path_guess_style(path)&
+		&result(ret)
+			integer(kind(cwk_path_style))::ret
+			character(len=*)::path
+			character(len=:),allocatable::cpath
+			cpath=c_str(path)
+			ret=cwk_path_guess_style(cpath)
+		endfunction path_guess_style
+
+		function path_get_first_segment(path,segment)&
+		&result(ret)
+			logical::ret
+			type(cwk_segment)::segment
+			character(len=*)::path
+			character(len=:),allocatable::cpath
+			cpath=c_str(path)
+			ret=cwk_path_get_first_segment(cpath,segment)
+		endfunction path_get_first_segment
+
+
+
+
+
 
 endmodule fwalk

@@ -4,6 +4,9 @@ license = "MIT"
 author = "Andre Smit"
 maintainer = "freevryheid@gmail.com"
 copyright = "Copyright 2022, Andre Smit"
+executable = [
+  { name = "test1", main = "test1.c" },
+]
 [build]
 auto-executables = true
 auto-tests = true
