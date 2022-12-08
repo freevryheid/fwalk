@@ -21,20 +21,12 @@ module fwalk
 	public::path_is_separator,path_guess_style
 	public::path_set_style,path_get_style
 
-	! type,public,bind(c)::cwk_segment
-	! 	type(c_ptr)::path
-	! 	type(c_ptr)::segments
-	! 	type(c_ptr)::begin
-	! 	type(c_ptr)::end
-	! 	integer(kind=c_size_t)::size
-	! endtype
-
 	type,public,bind(c)::cwk_segment
-		character(kind=c_char)::path
-		character(kind=c_char)::segments
-		character(kind=c_char)::begin
-		character(kind=c_char)::end
-		integer(kind=c_size_t)::size
+		type(c_ptr)::path=c_null_ptr
+		type(c_ptr)::segments=c_null_ptr
+		type(c_ptr)::begin=c_null_ptr
+		type(c_ptr)::end=c_null_ptr
+		integer(kind=c_size_t)::size=0
 	endtype
 
 	enum,bind(c)
@@ -467,10 +459,5 @@ module fwalk
 			cpath=c_str(path)
 			ret=cwk_path_get_first_segment(cpath,segment)
 		endfunction path_get_first_segment
-
-
-
-
-
 
 endmodule fwalk

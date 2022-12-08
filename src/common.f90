@@ -38,11 +38,14 @@ module fwalk_common
 			character(kind=c_char),pointer::ptrs(:)
 			integer(kind=c_size_t)::sz
 			if(.not.c_associated(cstr))then
-				print*,"WTF:Not Associated?"
+				fstr=""
 				return
 			endif
 			sz=c_strlen(cstr)
-			if(sz.lt.0) return
+			if(sz.lt.0)then
+				fstr=""
+				return
+			endif
 			call c_f_pointer(cstr,ptrs,[sz])
 			allocate(character(len=sz)::fstr)
 			fstr=copy(ptrs)

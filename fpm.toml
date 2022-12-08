@@ -11,6 +11,8 @@ executable = [
 auto-executables = true
 auto-tests = true
 auto-examples = true
+[library]
+include-dir=["src"]
 # [dependencies]
 # stdlib = { git="https://github.com/fortran-lang/stdlib", branch="stdlib-fpm" }
 [dev-dependencies]
@@ -18,3 +20,4 @@ stdlib = { git="https://github.com/fortran-lang/stdlib", branch="stdlib-fpm" }
 test-drive = { git="https://github.com/fortran-lang/test-drive" }
 [install]
 library = false
+

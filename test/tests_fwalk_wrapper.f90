@@ -29,7 +29,8 @@ module tests_fwalk_wrapper
 			logical::chk
 			type(cwk_segment)::segment
 			integer(kind(cwk_path_style))::style
-			character(len=:),allocatable::begin
+			character(len=:),allocatable::tpath,tsegments,tbegin,tend
+
 			blen=1000
 			allocate(character(len=blen)::buf)
 
@@ -249,15 +250,11 @@ module tests_fwalk_wrapper
 
 			! get first segment
 			call path_set_style(CWK_STYLE_UNIX)
-			segment=cwk_segment(path="       ",segments="        ",begin="          ",end="        ",size=0)
-			chk=path_get_first_segment("/my/path.txt",segment)
+			segment = cwk_segment()
+			chk=path_get_first_segment("/my123456/path.txt",segment)
 			if(chk)then
-				! if(c_associated(segment%begin))then
-				! 	call c_f_str_ptr(segment%begin,begin)
-				! 	print *,begin
-				! 	write(*,'(a,a)')"segment is ",begin(1:segment%size)
-				! endif
-				write(*,'(a,i0)')"segment length is ",segment%size
+				call c_f_str_ptr(segment%begin,tbegin)
+				call check(error,tbegin,"my123456")
 			else
 				print*,"no segments in path"
 			endif
