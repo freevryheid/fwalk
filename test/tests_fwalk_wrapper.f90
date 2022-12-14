@@ -21,57 +21,44 @@ module tests_fwalk_wrapper
 
 		subroutine test_wrapper(error)
 			type(error_type),allocatable,intent(out)::error
-			type(string_type),dimension(:),allocatable::relative_paths
-			type(string_type),dimension(:),allocatable::absolute_paths
-			character(len=:),allocatable::path,basename,new_basename,new_root,buf
-			character(len=:),allocatable::extension
-			integer::ret,length,blen,i
+			type(string_type),dimension(:),allocatable::relative_paths,absolute_paths
+			character(len=:),allocatable::path,basename,new_basename,new_root,extension
+			character(len=:),allocatable::tpath,tsegments,tbegin,tend
+			character(len=1000)::buf
+			character(len=15),dimension(3)::paths
+			integer::ret,length,i
 			logical::chk
 			type(cwk_segment)::segment
 			integer(kind(cwk_path_style))::style
-			character(len=:),allocatable::tpath,tsegments,tbegin,tend
-
-			blen=1000
-			allocate(character(len=blen)::buf)
 
 			! base and path
 			call path_set_style(CWK_STYLE_UNIX)
-
 			path="/my/"
 			call path_get_basename(path,basename,length)
 			call check(error,basename(1:length),"my")
-
 			call path_get_basename("/not_my",basename,length)
 			call check(error,basename(1:length),"not_my")
-
 			path="/my/path.txt"
 			call path_get_basename(path,basename,length)
 			call check(error,basename(1:length),"path.txt")
-
 			path="/my/path.zip////"
 			call path_get_basename(path,basename,length)
 			call check(error,basename(1:length),"path.zip")
-
 			path="///////////////////////////////////////"
 			call path_get_basename(path,basename,length)
 			call check(error,length,0)
-
 			path="/"
 			call path_get_basename(path,basename,length)
 			call check(error,length,0)
-
 			path=".."
 			call path_get_basename(path,basename,length)
 			call check(error,basename(1:length),path)
-
 			path="filename"
 			call path_get_basename(path,basename,length)
 			call check(error,basename(1:length),path)
-
 			path='.'
 			call path_get_basename(path,basename,length)
 			call check(error,basename(1:length),path)
-
 			call path_set_style(CWK_STYLE_WINDOWS)
 			path="c:\path\test.txt"
 			call path_get_basename(path,basename,length)
@@ -81,13 +68,12 @@ module tests_fwalk_wrapper
 			call path_set_style(CWK_STYLE_UNIX)
 			path="/my/path.txt"
 			new_basename="new_path.txt"
-			ret=path_change_basename(path,new_basename,buf,blen)
+			ret=path_change_basename(path,new_basename,buf,len(buf))
 			call check(error,buf(1:ret),"/my/new_path.txt")
-
 			call path_set_style(CWK_STYLE_WINDOWS)
 			path="d:\my\path.txt"
 			new_basename="new_path.txt"
-			ret=path_change_basename(path,new_basename,buf,blen)
+			ret=path_change_basename(path,new_basename,buf,len(buf))
 			call check(error,buf(1:ret),"d:\my\new_path.txt")
 
 			! directory name
@@ -124,11 +110,11 @@ module tests_fwalk_wrapper
 			call path_set_style(CWK_STYLE_UNIX)
 			path="/my/path.txt"
 			new_root="/not_my/"
-			ret=path_change_root(path,new_root,buf,blen)
+			ret=path_change_root(path,new_root,buf,len(buf))
 			call check(error,buf(1:ret),"/not_my/my/path.txt")
 			path="path.txt"
 			new_root="/my/"
-			ret=path_change_root(path,new_root,buf,blen)
+			ret=path_change_root(path,new_root,buf,len(buf))
 			call check(error,buf(1:ret),"/my/path.txt")
 
 			! absolute and relative paths
@@ -168,33 +154,39 @@ module tests_fwalk_wrapper
 
 			! join path
 			call path_set_style(CWK_STYLE_UNIX)
-			ret=path_join("/first","/second",buf,blen)
+			ret=path_join("/first","/second",buf,len(buf))
 			call check(error,buf(1:ret),"/first/second")
-			ret=path_join("hello","..",buf,blen)
+			ret=path_join("hello","..",buf,len(buf))
 			call check(error,buf(1:ret),".")
-			ret=path_join("hello/there","..",buf,blen)
+			ret=path_join("hello/there","..",buf,len(buf))
 			call check(error,buf(1:ret),"hello")
-			ret=path_join("hello/there","../world",buf,blen)
+			ret=path_join("hello/there","../world",buf,len(buf))
 			call check(error,buf(1:ret),"hello/world")
 			call path_set_style(CWK_STYLE_WINDOWS)
-			ret=path_join("this\","c:\..\..\is\a\test\",buf,blen)
+			ret=path_join("this\","c:\..\..\is\a\test\",buf,len(buf))
 			call check(error,buf(1:ret),"is\a\test")
 
-			! TODO multiple paths array
+			! join multiple paths array
+			call path_set_style(CWK_STYLE_UNIX)
+			paths(1)="hello/there"
+			paths(2)="../world"
+			paths(3)=""
+			ret=path_join_multiple(paths,buf,len(buf))
+			call check(error,buf(1:ret),"hello/world")
 
 			! normalize path
 			call path_set_style(CWK_STYLE_UNIX)
-			ret=path_normalize("/var",buf,blen)
+			ret=path_normalize("/var",buf,len(buf))
 			call check(error,buf(1:ret),"/var")
-			ret=path_normalize("/var/logs/test/../../",buf,blen)
+			ret=path_normalize("/var/logs/test/../../",buf,len(buf))
 			call check(error,buf(1:ret),"/var")
-			ret=path_normalize("/var/logs/test/../../../../../../",buf,blen)
+			ret=path_normalize("/var/logs/test/../../../../../../",buf,len(buf))
 			call check(error,buf(1:ret),"/")
-			ret=path_normalize("rel/../../",buf,blen)
+			ret=path_normalize("rel/../../",buf,len(buf))
 			call check(error,buf(1:ret),"..")
-			ret=path_normalize("/var////logs//test/",buf,blen)
+			ret=path_normalize("/var////logs//test/",buf,len(buf))
 			call check(error,buf(1:ret),"/var/logs/test")
-			ret=path_normalize("/var/./logs/.//test/..//..//////",buf,blen)
+			ret=path_normalize("/var/./logs/.//test/..//..//////",buf,len(buf))
 			call check(error,buf(1:ret),"/var")
 
 			! path_get_intersection
@@ -202,15 +194,15 @@ module tests_fwalk_wrapper
 			call check(error,ret,16)
 
 			! get absolute path
-			ret=path_get_absolute("/hello/there","../../../../../",buf,blen)
+			ret=path_get_absolute("/hello/there","../../../../../",buf,len(buf))
 			call check(error,buf(1:ret),"/")
-			ret=path_get_absolute("/hello//../there","test//thing",buf,blen)
+			ret=path_get_absolute("/hello//../there","test//thing",buf,len(buf))
 			call check(error,buf(1:ret),"/there/test/thing")
 
 			! get relative path
-			ret=path_get_relative("/../../","/../../",buf,blen)
+			ret=path_get_relative("/../../","/../../",buf,len(buf))
 			call check(error,buf(1:ret),".")
-			ret=path_get_relative("/path/same","/path/not_same/ho/..",buf,blen)
+			ret=path_get_relative("/path/same","/path/not_same/ho/..",buf,len(buf))
 			call check(error,buf(1:ret),"../not_same")
 
 			! get extension
@@ -228,13 +220,12 @@ module tests_fwalk_wrapper
 			chk= path_has_extension("/my/path")
 			call check(error,chk,.false.)
 
-
 			! change extension
 			call path_set_style(CWK_STYLE_UNIX)
-			ret=path_change_extension("/my/path.txt","md",buf,blen)
+			ret=path_change_extension("/my/path.txt","md",buf,len(buf))
 			call check(error,buf(1:ret),"/my/path.md")
 			call path_set_style(CWK_STYLE_WINDOWS)
-			ret=path_change_extension("c:\path.txt","md",buf,blen)
+			ret=path_change_extension("c:\path.txt","md",buf,len(buf))
 			call check(error,buf(1:ret),"c:\path.md")
 
 			! style
@@ -250,9 +241,10 @@ module tests_fwalk_wrapper
 
 			! get first segment
 			call path_set_style(CWK_STYLE_UNIX)
-			segment = cwk_segment()
+			segment=cwk_segment()
 			chk=path_get_first_segment("/my123456/path.txt",segment)
 			if(chk)then
+				print*,"convert"
 				call c_f_str_ptr(segment%begin,tbegin)
 				call check(error,tbegin,"my123456")
 			else
