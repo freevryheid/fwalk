@@ -7,11 +7,12 @@ module fwalk
 
 	private
 
+	integer,parameter::blen=255
+
 	public::cwk_segment_type,CWK_NORMAL,CWK_CURRENT,CWK_BACK
 	public::cwk_path_style,CWK_STYLE_WINDOWS,CWK_STYLE_UNIX
 	public::path_get_absolute,path_get_relative,path_join
 	public::path_join_multiple,path_get_root,path_change_root
-	! public::path_get_root,path_change_root
 	public::path_is_absolute,path_is_relative
 	public::path_get_basename,path_change_basename,path_get_dirname
 	public::path_get_extension,path_has_extension,path_change_extension
@@ -22,21 +23,21 @@ module fwalk
 	public::path_is_separator,path_guess_style
 	public::path_set_style,path_get_style
 
-	! type,public,bind(c)::cwk_segment
-	! 	type(c_ptr)::path=c_null_ptr
-	! 	type(c_ptr)::segments=c_null_ptr
-	! 	type(c_ptr)::begin=c_null_ptr
-	! 	type(c_ptr)::end=c_null_ptr
-	! 	integer(kind=c_size_t)::size=0
-	! endtype
-
 	type,public,bind(c)::cwk_segment
-		character(kind=c_char)::path
-		character(kind=c_char)::segments
-		character(kind=c_char)::begin
-		character(kind=c_char)::end
+		type(c_ptr)::path=c_null_ptr
+		type(c_ptr)::segments=c_null_ptr
+		type(c_ptr)::begin=c_null_ptr
+		type(c_ptr)::end=c_null_ptr
 		integer(kind=c_size_t)::size=0
 	endtype
+
+	! type,public,bind(c)::cwk_segment
+	! 	character(kind=c_char)::path=c_null_char
+	! 	character(kind=c_char)::segments=c_null_char
+	! 	character(kind=c_char)::begin=c_null_char
+	! 	character(kind=c_char)::end=c_null_char
+	! 	integer(kind=c_size_t)::size=0
+	! endtype
 
 	enum,bind(c)
 		enumerator::cwk_segment_type=0
@@ -207,7 +208,7 @@ module fwalk
 		function cwk_path_get_first_segment(path,segment)&
 		&bind(c,name="cwk_path_get_first_segment")&
 		&result(ret)
-			import c_char,c_bool,cwk_segment
+			import c_char,c_bool,cwk_segment,c_ptr
 			logical(kind=c_bool)::ret
 			type(cwk_segment)::segment
 			character(kind=c_char)::path

@@ -10,6 +10,8 @@ module tests_fwalk_wrapper
 
 	private
 
+	integer,parameter::blen=1000
+
 	public :: collect_tests_fwalk_wrapper
 
 	contains
@@ -23,8 +25,8 @@ module tests_fwalk_wrapper
 			type(error_type),allocatable,intent(out)::error
 			type(string_type),dimension(:),allocatable::relative_paths,absolute_paths
 			character(len=:),allocatable::path,basename,new_basename,new_root,extension
-			character(len=:),allocatable::tpath,tsegments,tbegin,tend
-			character(len=1000)::buf
+			character(len=:),pointer::fpath,fsegments,fbegin,fend
+			character(len=blen)::buf
 			character(len=15),dimension(3)::paths
 			integer::ret,length,i
 			logical::chk
@@ -244,9 +246,9 @@ module tests_fwalk_wrapper
 			segment=cwk_segment()
 			chk=path_get_first_segment("/my123456/path.txt",segment)
 			if(chk)then
-				print*,"convert"
-				call c_f_str_ptr(segment%begin,tbegin)
-				call check(error,tbegin,"my123456")
+				call c_f_pointer(segment%begin,fbegin)
+				fbegin=>fbegin(1:segment%size)
+			call check(error,fbegin,"my123456")
 			else
 				print*,"no segments in path"
 			endif

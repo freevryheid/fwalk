@@ -9,6 +9,7 @@ module fwalk_common
 	public::c_strlen
 	public::c_f_str_ptr
 	public::c_str
+	public::copy
 
 	interface
 
