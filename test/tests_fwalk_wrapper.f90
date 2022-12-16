@@ -25,12 +25,13 @@ module tests_fwalk_wrapper
 			type(error_type),allocatable,intent(out)::error
 			type(string_type),dimension(:),allocatable::relative_paths,absolute_paths
 			character(len=:),allocatable::path,basename,new_basename,new_root,extension
-			character(len=:),pointer::fpath,fsegments,fbegin,fend
+			character(kind=c_char,len=:),pointer::fbegin
 			character(len=blen)::buf
 			character(len=15),dimension(3)::paths
 			integer::ret,length,i
 			logical::chk
 			type(cwk_segment)::segment
+			integer(kind(cwk_segment_type))::typ
 			integer(kind(cwk_path_style))::style
 
 			! base and path
@@ -244,16 +245,112 @@ module tests_fwalk_wrapper
 			! get first segment
 			call path_set_style(CWK_STYLE_UNIX)
 			segment=cwk_segment()
-			chk=path_get_first_segment("/my123456/path.txt",segment)
+			chk=path_get_first_segment("/my123/path.txt"//c_null_char,segment)
 			if(chk)then
-				call c_f_pointer(segment%begin,fbegin)
-				fbegin=>fbegin(1:segment%size)
-			call check(error,fbegin,"my123456")
+				block
+					character(kind=c_char,len=segment%siz),pointer::tbegin
+					call c_f_pointer(segment%begin,tbegin)
+					fbegin=>tbegin
+					nullify(tbegin)
+				end block
+				call check(error,fbegin,"my123")
 			else
 				print*,"no segments in path"
 			endif
 
-			if (allocated(error)) return
+			! get last segment
+			call path_set_style(CWK_STYLE_UNIX)
+			segment=cwk_segment()
+			chk=path_get_last_segment("/my123/path.txt"//c_null_char,segment)
+			if(chk)then
+				block
+					character(kind=c_char,len=segment%siz),pointer::tbegin
+					call c_f_pointer(segment%begin,tbegin)
+					fbegin=>tbegin
+					nullify(tbegin)
+				end block
+				call check(error,fbegin,"path.txt")
+			else
+				print*,"no segments in path"
+			endif
+
+			! get next segment
+			call path_set_style(CWK_STYLE_UNIX)
+			segment=cwk_segment()
+			chk=path_get_first_segment("/my/funny/test/path.txt"//c_null_char,segment)
+			if(chk)then
+				i=1
+				do
+					block
+						character(kind=c_char,len=segment%siz),pointer::tbegin
+						call c_f_pointer(segment%begin,tbegin)
+						fbegin=>tbegin
+						nullify(tbegin)
+					end block
+					if(i.eq.1)call check(error,fbegin,"my")
+					if(i.eq.2)call check(error,fbegin,"funny")
+					if(i.eq.3)call check(error,fbegin,"test")
+					if(i.eq.4)then
+						call check(error,fbegin,"path.txt")
+						exit
+					endif
+					i=i+1
+					chk=path_get_next_segment(segment)
+				enddo
+			else
+				print*,"no segments in path"
+			endif
+
+			! get previous segment
+			call path_set_style(CWK_STYLE_UNIX)
+			segment=cwk_segment()
+			chk=path_get_last_segment("/my/funny/test/path.txt"//c_null_char,segment)
+			if(chk)then
+				i=1
+				do
+					block
+						character(kind=c_char,len=segment%siz),pointer::tbegin
+						call c_f_pointer(segment%begin,tbegin)
+						fbegin=>tbegin
+						nullify(tbegin)
+					end block
+					if(i.eq.1)call check(error,fbegin,"path.txt")
+					if(i.eq.2)call check(error,fbegin,"test")
+					if(i.eq.3)call check(error,fbegin,"funny")
+					if(i.eq.4)then
+						call check(error,fbegin,"my")
+						exit
+					endif
+					i=i+1
+					chk=path_get_previous_segment(segment)
+				enddo
+			else
+				print*,"no segments in path"
+			endif
+
+		! get segment type
+			call path_set_style(CWK_STYLE_UNIX)
+			segment=cwk_segment()
+			chk=path_get_first_segment("/../my123/path.txt"//c_null_char,segment)
+			if(chk)then
+				typ=path_get_segment_type(segment)
+				call check(error,int(typ),int(CWK_BACK))
+			else
+				print*,"no segments in path"
+			endif
+
+			! change segment
+			call path_set_style(CWK_STYLE_UNIX)
+			segment=cwk_segment()
+			chk=path_get_first_segment("/my123/path.txt"//c_null_char,segment)
+			if(chk)then
+				ret=path_change_segment(segment,"your456"//c_null_char,buf,blen)
+				call check(error,buf(1:ret),"/your456/path.txt")
+			else
+				print*,"no segments in path"
+			endif
+
+	if (allocated(error)) return
 		endsubroutine test_wrapper
 
 endmodule tests_fwalk_wrapper

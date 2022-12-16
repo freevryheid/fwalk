@@ -28,16 +28,8 @@ module fwalk
 		type(c_ptr)::segments=c_null_ptr
 		type(c_ptr)::begin=c_null_ptr
 		type(c_ptr)::end=c_null_ptr
-		integer(kind=c_size_t)::size=0
+		integer(kind=c_size_t)::siz=0
 	endtype
-
-	! type,public,bind(c)::cwk_segment
-	! 	character(kind=c_char)::path=c_null_char
-	! 	character(kind=c_char)::segments=c_null_char
-	! 	character(kind=c_char)::begin=c_null_char
-	! 	character(kind=c_char)::end=c_null_char
-	! 	integer(kind=c_size_t)::size=0
-	! endtype
 
 	enum,bind(c)
 		enumerator::cwk_segment_type=0
@@ -208,7 +200,7 @@ module fwalk
 		function cwk_path_get_first_segment(path,segment)&
 		&bind(c,name="cwk_path_get_first_segment")&
 		&result(ret)
-			import c_char,c_bool,cwk_segment,c_ptr
+			import c_char,c_bool,cwk_segment
 			logical(kind=c_bool)::ret
 			type(cwk_segment)::segment
 			character(kind=c_char)::path
@@ -465,9 +457,7 @@ module fwalk
 			logical::ret
 			type(cwk_segment)::segment
 			character(len=*)::path
-			character(len=:),allocatable::cpath
-			cpath=c_str(path)
-			ret=cwk_path_get_first_segment(cpath,segment)
+			ret=cwk_path_get_first_segment(path,segment)
 		endfunction path_get_first_segment
 
 		function path_get_last_segment(path,segment)&
@@ -475,9 +465,7 @@ module fwalk
 			logical::ret
 			type(cwk_segment)::segment
 			character(len=*)::path
-			character(len=:),allocatable::cpath
-			cpath=c_str(path)
-			ret=cwk_path_get_last_segment(cpath,segment)
+			ret=cwk_path_get_last_segment(path,segment)
 		endfunction path_get_last_segment
 
 		function path_change_segment(segment,value,buffer,buffer_size)&
@@ -485,9 +473,7 @@ module fwalk
 			type(cwk_segment)::segment
 			integer::ret,buffer_size
 			character(len=*)::value,buffer
-			character(len=:),allocatable::cvalue
-			cvalue=c_str(value)
-			ret=int(cwk_path_change_segment(segment,cvalue,buffer,int(buffer_size,kind=c_size_t)))
+			ret=int(cwk_path_change_segment(segment,value,buffer,int(buffer_size,kind=c_size_t)))
 		endfunction path_change_segment
 
 		function path_join_multiple(paths,buffer,buffer_size)&
