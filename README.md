@@ -28,4 +28,4 @@ fpm build
 fpm test
 ```
 
-given the need to clone recursively, still investigating how to add this as a dependency within fpm.toml. 
+given the need to clone recursively, still investigating how to add this as a dependency within fpm.toml. I've submitted a PR to address this :https://github.com/fortran-lang/fpm/pull/816
